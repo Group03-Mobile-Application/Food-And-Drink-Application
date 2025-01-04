@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 
 import 'package:iconsax/iconsax.dart';
 
+import 'favorites_provider.dart';
+
 class FoodItemsDisplay extends StatelessWidget {
   final DocumentSnapshot<Object?> documentSnapshot;
   const FoodItemsDisplay({super.key, required this.documentSnapshot});
@@ -11,7 +13,7 @@ class FoodItemsDisplay extends StatelessWidget {
   Widget build(BuildContext context) {
     final provider = FavoriteProvider.of(context);
     return GestureDetector(
-      onTap: () {
+      /*onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -19,7 +21,7 @@ class FoodItemsDisplay extends StatelessWidget {
                 RecipeDetailScreen(documentSnapshot: documentSnapshot),
           ),
         );
-      },
+      },*/
       child: Container(
         margin: const EdgeInsets.only(right: 10),
         width: 230,

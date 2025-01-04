@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:food_and_drink/Views/view_all_items.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../Utils/constant.dart';
 import '../Widget/banner.dart';
 import '../Widget/icon_button.dart';
 import '../Widget/items_display.dart';
