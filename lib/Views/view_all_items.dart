@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-
 import 'package:iconsax/iconsax.dart';
 
 import '../Utils/constants.dart';
@@ -16,7 +15,7 @@ class ViewAllItems extends StatefulWidget {
 
 class _ViewAllItemsState extends State<ViewAllItems> {
   final CollectionReference completeApp =
-      FirebaseFirestore.instance.collection("Complete-Flutter-App");
+      FirebaseFirestore.instance.collection("Food-And-Drink-Application");
   @override
   Widget build(BuildContext context) {
     return Scaffold(

@@ -1,12 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:food_and_drink/Provider/favorite_provider.dart';
-import 'package:food_and_drink/Provider/quantity.dart';
-import 'package:food_and_drink/Utils/constants.dart';
-import 'package:food_and_drink/Widget/my_icon_button.dart';
-import 'package:food_and_drink/Widget/quantity_increment_decrement.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:provider/provider.dart';
+
+import '../Provider/favorite_provider.dart';
+import '../Provider/quantity.dart';
+import '../Utils/constants.dart';
+import '../Widget/my_icon_button.dart';
+import '../Widget/quantity_increment_decrement.dart';
 
 class RecipeDetailScreen extends StatefulWidget {
   final DocumentSnapshot<Object?> documentSnapshot;
@@ -220,20 +221,20 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                                 .documentSnapshot['ingredientsImage']
                                 .map<Widget>(
                                   (imageUrl) => Container(
-                                height: 60,
-                                width: 60,
-                                margin: const EdgeInsets.only(bottom: 10),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(20),
-                                  image: DecorationImage(
-                                    fit: BoxFit.cover,
-                                    image: NetworkImage(
-                                      imageUrl,
+                                    height: 60,
+                                    width: 60,
+                                    margin: const EdgeInsets.only(bottom: 10),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(20),
+                                      image: DecorationImage(
+                                        fit: BoxFit.cover,
+                                        image: NetworkImage(
+                                          imageUrl,
+                                        ),
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ),
-                            )
+                                )
                                 .toList(),
                           ),
                           const SizedBox(width: 20),
@@ -242,17 +243,17 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: widget.documentSnapshot['ingredientsName']
                                 .map<Widget>((ingredient) => SizedBox(
-                              height: 60,
-                              child: Center(
-                                child: Text(
-                                  ingredient,
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.grey.shade400,
-                                  ),
-                                ),
-                              ),
-                            ))
+                                      height: 60,
+                                      child: Center(
+                                        child: Text(
+                                          ingredient,
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            color: Colors.grey.shade400,
+                                          ),
+                                        ),
+                                      ),
+                                    ))
                                 .toList(),
                           ),
                           // ingredient amount
@@ -260,17 +261,17 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                           Column(
                             children: quantityProvider.updateIngredientAmounts
                                 .map<Widget>((amount) => SizedBox(
-                              height: 60,
-                              child: Center(
-                                child: Text(
-                                  "${amount}gm",
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.grey.shade400,
-                                  ),
-                                ),
-                              ),
-                            ))
+                                      height: 60,
+                                      child: Center(
+                                        child: Text(
+                                          "${amount}gm",
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            color: Colors.grey.shade400,
+                                          ),
+                                        ),
+                                      ),
+                                    ))
                                 .toList(),
                           ),
                         ],
@@ -299,7 +300,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
             style: ElevatedButton.styleFrom(
                 backgroundColor: kprimaryColor,
                 padding:
-                const EdgeInsets.symmetric(horizontal: 100, vertical: 13),
+                    const EdgeInsets.symmetric(horizontal: 100, vertical: 13),
                 foregroundColor: Colors.white),
             onPressed: () {},
             child: const Text(
