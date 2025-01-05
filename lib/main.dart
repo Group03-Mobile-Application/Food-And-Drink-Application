@@ -2,8 +2,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:food_and_drink/views/app_main_screen.dart';
 import 'package:provider/provider.dart';
+import '../Provider/favorite_provider.dart';
 
-import 'Widget/favorites_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
