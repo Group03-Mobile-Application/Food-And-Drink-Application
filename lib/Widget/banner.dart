@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import '../Views/view_all_items.dart';
 import '../Utils/constants.dart';
 
 class BannerToExplore extends StatelessWidget {
@@ -40,7 +40,14 @@ class BannerToExplore extends StatelessWidget {
                     backgroundColor: Colors.white,
                     elevation: 0,
                   ),
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const ViewAllItems(),
+                      ),
+                    );
+                  },
                   child: const Text(
                     "Explore",
                     style: TextStyle(

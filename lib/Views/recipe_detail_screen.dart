@@ -185,7 +185,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            "Infredients",
+                            "Ingredients",
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
