@@ -8,6 +8,7 @@ import '../Provider/quantity.dart';
 import '../Utils/constants.dart';
 import '../Widget/my_icon_button.dart';
 import '../Widget/quantity_increment_decrement.dart';
+import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 class RecipeDetailScreen extends StatefulWidget {
   final DocumentSnapshot<Object?> documentSnapshot;
@@ -18,18 +19,66 @@ class RecipeDetailScreen extends StatefulWidget {
 }
 
 class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
+  YoutubePlayerController? _youtubeController;
+
   @override
   void initState() {
-    // initialize base ingredient amounts in the provider
+    super.initState();
+
+    // Initialize base ingredient amounts
     List<double> baseAmounts = widget.documentSnapshot['ingredientsAmount']
         .map<double>((amount) => double.parse(amount.toString()))
         .toList();
     Provider.of<QuantityProvider>(context, listen: false)
         .setBaseIngredientAmounts(baseAmounts);
-    super.initState();
+
+    // Initialize YouTube player controller if videoLink is available
+    final videoLink = widget.documentSnapshot['videoLink'];
+    if (videoLink != null && videoLink.isNotEmpty) {
+      _youtubeController = YoutubePlayerController(
+        initialVideoId: YoutubePlayer.convertUrlToId(videoLink)!,
+        flags: const YoutubePlayerFlags(
+          autoPlay: false,
+          mute: false,
+        ),
+      );
+    }
   }
 
-// we have a Spelling mistake that's what we face a error, be carefully, all items name must be same in firebase
+  @override
+  void dispose() {
+    _youtubeController?.dispose();
+    super.dispose();
+  }
+
+  void _showVideoDialog() {
+    if (_youtubeController == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No video link available')),
+      );
+      return;
+    }
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        content: AspectRatio(
+          aspectRatio: 16 / 9,
+          child: YoutubePlayer(
+            controller: _youtubeController!,
+            showVideoProgressIndicator: true,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final provider = FavoriteProvider.of(context);
@@ -288,21 +337,20 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
     );
   }
 
-  FloatingActionButton startCookingAndFavoriteButton(
-      FavoriteProvider provider) {
+  FloatingActionButton startCookingAndFavoriteButton(FavoriteProvider provider) {
     return FloatingActionButton.extended(
       backgroundColor: Colors.transparent,
       elevation: 0,
-      onPressed: () {},
+      onPressed: null,
       label: Row(
         children: [
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-                backgroundColor: kprimaryColor,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 100, vertical: 13),
-                foregroundColor: Colors.white),
-            onPressed: () {},
+              backgroundColor: kprimaryColor,
+              padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 13),
+              foregroundColor: Colors.white,
+            ),
+            onPressed: _showVideoDialog, // Trigger the video dialog
             child: const Text(
               "Start Cooking",
               style: TextStyle(
