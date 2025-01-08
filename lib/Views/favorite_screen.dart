@@ -21,9 +21,11 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
     final provider = FavoriteProvider.of(context);
     final favoriteItems = provider.favorites;
     return Scaffold(
-      backgroundColor: themeProvider.isDarkMode ? Colors.grey[850] : kbackgroundColor, // Change here
+      backgroundColor: themeProvider.isDarkMode ?
+      Colors.grey[850] : kbackgroundColor, // Change here
       appBar: AppBar(
-        backgroundColor: themeProvider.isDarkMode ? Colors.grey[850] : kbackgroundColor, // Change here
+        backgroundColor: themeProvider.isDarkMode ?
+        Colors.grey[850] : kbackgroundColor, // Change here
         centerTitle: true,
         title:  Text(
           "Favorites",

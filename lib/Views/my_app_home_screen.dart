@@ -41,7 +41,7 @@ class _MyAppHomeScreenState extends State<MyAppHomeScreen> {
     if (_searchController.text.isEmpty) {
       return category == "All" ? allRecipes : fileteredRecipes;
     } else {
-      return filteredRecipesByName; // Use the filtered recipes query when there's a search
+      return filteredRecipesByName;
     }
   }
 
@@ -49,7 +49,8 @@ class _MyAppHomeScreenState extends State<MyAppHomeScreen> {
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
     return Scaffold(
-      backgroundColor: themeProvider.isDarkMode ? Colors.grey[850] : kbackgroundColor, // Change here
+      backgroundColor: themeProvider.isDarkMode ?
+      Colors.grey[850] : kbackgroundColor, // Change here
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
@@ -166,7 +167,8 @@ class _MyAppHomeScreenState extends State<MyAppHomeScreen> {
                       color:
                       category == streamSnapshot.data!.docs[index]['name']
                           ? kprimaryColor
-                          :  themeProvider.isDarkMode ? Colors.grey[800] : Colors.white, // Change here
+                          :  themeProvider.isDarkMode ?
+                      Colors.grey[800] : Colors.white,
                     ),
                     padding: const EdgeInsets.symmetric(
                       horizontal: 20,
@@ -179,7 +181,8 @@ class _MyAppHomeScreenState extends State<MyAppHomeScreen> {
                         color:
                         category == streamSnapshot.data!.docs[index]['name']
                             ? Colors.white
-                            :   themeProvider.isDarkMode ? Colors.white : Colors.grey.shade600,// Change here
+                            :   themeProvider.isDarkMode ?
+                        Colors.white : Colors.grey.shade600,// Change here
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -203,16 +206,24 @@ class _MyAppHomeScreenState extends State<MyAppHomeScreen> {
       child: TextField(
         controller: _searchController,
         onChanged: (_) => setState(() {}),
-        style: TextStyle(color: themeProvider.isDarkMode ? Colors.white : Colors.black),
+        style: TextStyle(color: themeProvider.isDarkMode ?
+        Colors.white : Colors.black),
         decoration: InputDecoration(
           filled: true,
-          prefixIcon: Icon(Iconsax.search_normal, color: themeProvider.isDarkMode ? Colors.white : Colors.black),
-          fillColor: themeProvider.isDarkMode ? Colors.grey[800] : Colors.white,
+          prefixIcon: Icon(Iconsax.search_normal,
+              color: themeProvider.isDarkMode ? Colors.white : Colors.black),
+          fillColor: themeProvider.isDarkMode ?
+          Colors.grey[800] : Colors.white,
           border: InputBorder.none,
           hintText: "Search any recipes",
-          hintStyle: TextStyle(color: themeProvider.isDarkMode ? Colors.white : Colors.grey),
-          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
-          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
+          hintStyle: TextStyle(
+              color: themeProvider.isDarkMode ? Colors.white : Colors.grey),
+          enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: BorderSide.none),
+          focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: BorderSide.none),
         ),
       ),
     );

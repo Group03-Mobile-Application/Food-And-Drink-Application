@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:provider/provider.dart';
+import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 import '../Provider/favorite_provider.dart';
 import '../Provider/quantity.dart';
@@ -9,6 +10,7 @@ import '../Provider/theme_provider.dart';
 import '../Utils/constants.dart';
 import '../Widget/my_icon_button.dart';
 import '../Widget/quantity_increment_decrement.dart';
+
 
 class RecipeDetailScreen extends StatefulWidget {
   final DocumentSnapshot<Object?> documentSnapshot;
@@ -20,10 +22,14 @@ class RecipeDetailScreen extends StatefulWidget {
 
 class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
   final TextEditingController _commentController = TextEditingController();
+  YoutubePlayerController? _youtubeController;
+
 
   @override
   void dispose() {
     _commentController.dispose();
+    super.dispose();
+    _youtubeController?.dispose();
     super.dispose();
   }
 
@@ -43,7 +49,93 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
     }
 
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    final videoLink = widget.documentSnapshot['videoLink'];
+    if (videoLink != null && videoLink.isNotEmpty) {
+      _youtubeController = YoutubePlayerController(
+        initialVideoId: YoutubePlayer.convertUrlToId(videoLink)!,
+        flags: const YoutubePlayerFlags(
+          autoPlay: false,
+          mute: false,
+        ),
+      );
+    }
+  }
+   void _showVideoDialog() {
+     if (_youtubeController == null) {
+       ScaffoldMessenger.of(context).showSnackBar(
+         const SnackBar(content: Text('No video link available')),
+       );
+       return;
+     }
+     showDialog(
+       context: context,
+       builder: (context) =>
+           AlertDialog(
+             content: AspectRatio(
+               aspectRatio: 16 / 9,
+               child: YoutubePlayer(
+                 controller: _youtubeController!,
+                 showVideoProgressIndicator: true,
+               ),
+             ),
+             actions: [
+               TextButton(
+                 onPressed: () => Navigator.of(context).pop(),
+                 child: const Text('Close'),
+               ),
+             ],
+           ),
+     );
+   }
+
+  void _editComment(DocumentSnapshot comment) {
+    final TextEditingController _editController = TextEditingController(
+      text: comment['content'],
+    );
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Edit Comment'),
+        content: TextField(
+          controller: _editController,
+          decoration: InputDecoration(
+            hintText: 'Edit your comment...',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              if (_editController.text.isNotEmpty) {
+                try {
+                  await FirebaseFirestore.instance
+                      .collection('recipes')
+                      .doc(widget.documentSnapshot.id)
+                      .collection('comments')
+                      .doc(comment.id)
+                      .update({
+                    'content': _editController.text,
+                    'timestamp': FieldValue.serverTimestamp(),
+                  });
+                  Navigator.of(context).pop();
+                } catch (e) {
+                  print('Error updating comment: $e');
+                }
+              }
+            },
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+
+
+     WidgetsBinding.instance.addPostFrameCallback((_) {
       List<double> baseAmounts = widget.documentSnapshot['ingredientsAmount']
           .map<double>((amount) => double.parse(amount.toString()))
           .toList();
@@ -210,7 +302,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                       const SizedBox(width: 5),
                       Text(
                         "${widget.documentSnapshot[
-                          'reviews'.toString()]} Reviews",
+                        'reviews'.toString()]} Reviews",
                         style: const TextStyle(
                           color: Colors.grey,
                         ),
@@ -379,10 +471,12 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                             }
                             final comments = snapshot.data!.docs;
                             if (comments.isEmpty) {
-                              return  Text("No comments yet. Be the first!",
-                                  style: TextStyle(
-                                      color: themeProvider.isDarkMode ?
-                                      Colors.white : Colors.black));
+                              return Text(
+                                "No comments yet. Be the first!",
+                                style: TextStyle(
+                                    color: themeProvider.isDarkMode ?
+                                    Colors.white : Colors.black),
+                              );
                             }
                             return ListView.builder(
                               shrinkWrap: true,
@@ -391,24 +485,48 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                               itemBuilder: (context, index) {
                                 final comment = comments[index];
                                 return ListTile(
-                                  title:  Text(comment['content'],
-                                      style: TextStyle(
-                                          color: themeProvider.isDarkMode ?
-                                          Colors.white : Colors.black)),
-                                  subtitle: Text(comment['user'],
-                                      style: TextStyle(
-                                          color: themeProvider.isDarkMode ?
-                                          Colors.white : Colors.grey)),
-                                  trailing: Text(
-                                    (comment['timestamp'] as Timestamp?)
-                                        ?.toDate()
-                                        .toString()
-                                        .substring(0, 16) ??
-                                        "Just now",
+                                  title: Text(
+                                    comment['content'],
                                     style: TextStyle(
-                                        fontSize: 12,
                                         color: themeProvider.isDarkMode ?
-                                        Colors.white : Colors.grey),
+                                        Colors.white : Colors.black),
+                                  ),
+                                  subtitle: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        comment['user'],
+                                        style: TextStyle(
+                                          color: themeProvider.isDarkMode ?
+                                          Colors.white : Colors.grey,
+                                        ),
+                                      ),
+                                      Text(
+                                        (comment['timestamp'] as Timestamp?)
+                                            ?.toDate()
+                                            .toString()
+                                            .substring(0, 16) ??
+                                            "Just now",
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: themeProvider.isDarkMode ?
+                                          Colors.white : Colors.grey,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+
+                                  trailing: Column(
+                                    children: [
+                                      IconButton(
+                                        icon: SizedBox(
+                                          width: 20,
+                                          height: 20,
+                                          child: Icon(Icons.edit),
+                                        ),
+                                        onPressed: () => _editComment(comment),
+                                      ),
+                                    ],
                                   ),
                                 );
                               },
@@ -437,16 +555,16 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
     return FloatingActionButton.extended(
       backgroundColor: Colors.transparent,
       elevation: 0,
-      onPressed: () {},
+      onPressed: null,
       label: Row(
         children: [
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-                backgroundColor: kprimaryColor,
-                padding:
-                const EdgeInsets.symmetric(horizontal: 100, vertical: 13),
-                foregroundColor: Colors.white),
-            onPressed: () {},
+              backgroundColor: kprimaryColor,
+              padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 13),
+              foregroundColor: Colors.white,
+            ),
+            onPressed: _showVideoDialog, // Trigger the video dialog
             child: const Text(
               "Start Cooking",
               style: TextStyle(
