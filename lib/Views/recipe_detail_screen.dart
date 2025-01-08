@@ -18,15 +18,41 @@ class RecipeDetailScreen extends StatefulWidget {
 }
 
 class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
+  final TextEditingController _commentController = TextEditingController();
+
   @override
-  void initState() {
-    // initialize base ingredient amounts in the provider
-    List<double> baseAmounts = widget.documentSnapshot['ingredientsAmount']
-        .map<double>((amount) => double.parse(amount.toString()))
-        .toList();
-    Provider.of<QuantityProvider>(context, listen: false)
-        .setBaseIngredientAmounts(baseAmounts);
-    super.initState();
+  void dispose() {
+    _commentController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _addComment() async {
+    if (_commentController.text.isNotEmpty) {
+      await FirebaseFirestore.instance
+          .collection('recipes')
+          .doc(widget.documentSnapshot.id) // Use the current recipe ID
+          .collection('comments')
+          .add({
+        'content': _commentController.text,
+        'user': 'Anonymous User', // Replace with authenticated user if available
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+
+      // Clear the text field after submitting
+      _commentController.clear();
+    }
+
+
+
+    // Schedule the base amounts to be set after the widget tree is built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      List<double> baseAmounts = widget.documentSnapshot['ingredientsAmount']
+          .map<double>((amount) => double.parse(amount.toString()))
+          .toList();
+
+      Provider.of<QuantityProvider>(context, listen: false)
+          .setBaseIngredientAmounts(baseAmounts);
+    });
   }
 
 // we have a Spelling mistake that's what we face a error, be carefully, all items name must be same in firebase
@@ -278,7 +304,79 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                       )
                     ],
                   ),
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 30),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          "Comments",
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        TextField(
+                          controller: _commentController,
+                          decoration: InputDecoration(
+                            hintText: "Add a comment...",
+                            suffixIcon: IconButton(
+                              icon: const Icon(Icons.send),
+                              onPressed: _addComment,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 0),
+                        StreamBuilder<QuerySnapshot>(
+                          stream: FirebaseFirestore.instance
+                              .collection('recipes')
+                              .doc(widget.documentSnapshot.id)
+                              .collection('comments')
+                              .orderBy('timestamp', descending: true)
+                              .snapshots(),
+                          builder: (context, snapshot) {
+                            if (!snapshot.hasData) {
+                              return const Center(
+                                child: CircularProgressIndicator(),
+                              );
+                            }
+                            final comments = snapshot.data!.docs;
+                            if (comments.isEmpty) {
+                              return const Text("No comments yet. Be the first!");
+                            }
+                            return ListView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: comments.length,
+                              itemBuilder: (context, index) {
+                                final comment = comments[index];
+                                return ListTile(
+                                  title: Text(comment['content']),
+                                  subtitle: Text(comment['user']),
+                                  trailing: Text(
+                                    (comment['timestamp'] as Timestamp?)
+                                        ?.toDate()
+                                        .toString()
+                                        .substring(0, 16) ??
+                                        "Just now",
+                                    style: const TextStyle(fontSize: 12),
+                                  ),
+                                );
+                              },
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 150),
+                      ],
+                    ),
+                  ),
+
+
                 ],
               ),
             ),
@@ -287,6 +385,8 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
       ),
     );
   }
+
+
 
   FloatingActionButton startCookingAndFavoriteButton(
       FavoriteProvider provider) {

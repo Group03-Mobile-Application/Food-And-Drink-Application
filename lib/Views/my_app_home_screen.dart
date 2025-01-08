@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:food_and_drink/Views/view_all_items.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
+import 'package:provider/provider.dart';
+import '../Provider/theme_provider.dart';
 import '../Utils/constants.dart';
 import '../Widget/banner.dart';
 import '../Widget/food_items_display.dart';
@@ -17,24 +18,38 @@ class MyAppHomeScreen extends StatefulWidget {
 
 class _MyAppHomeScreenState extends State<MyAppHomeScreen> {
   String category = "All";
-  // for category
   final CollectionReference categoriesItems =
-      FirebaseFirestore.instance.collection("App-Category");
-  // for all itesm display
+  FirebaseFirestore.instance.collection("App-Category");
+
+  final TextEditingController _searchController = TextEditingController();
+
+  Query get filteredRecipesByName =>
+      FirebaseFirestore.instance.collection("Food-And-Drink-Application").where(
+        'name', isGreaterThanOrEqualTo: _searchController.text,
+        isLessThanOrEqualTo: _searchController.text + '\uf8ff',
+      );
+
   Query get fileteredRecipes =>
       FirebaseFirestore.instance.collection("Food-And-Drink-Application").where(
-            'category',
-            isEqualTo: category,
-          );
+        'category',
+        isEqualTo: category,
+      );
   Query get allRecipes =>
       FirebaseFirestore.instance.collection("Food-And-Drink-Application");
-  Query get selectedRecipes =>
-      category == "All" ? allRecipes : fileteredRecipes;
+
+  Query get selectedRecipes {
+    if (_searchController.text.isEmpty) {
+      return category == "All" ? allRecipes : fileteredRecipes;
+    } else {
+      return filteredRecipesByName; // Use the filtered recipes query when there's a search
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
     return Scaffold(
-      backgroundColor: kbackgroundColor,
+      backgroundColor: themeProvider.isDarkMode ? Colors.grey[850] : kbackgroundColor, // Change here
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
@@ -48,10 +63,9 @@ class _MyAppHomeScreenState extends State<MyAppHomeScreen> {
                   children: [
                     headerParts(),
                     mySearchBar(),
-                    // for banner
                     const BannerToExplore(),
-                    const Padding(
-                      padding: EdgeInsets.symmetric(
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
                         vertical: 20,
                       ),
                       child: Text(
@@ -59,21 +73,22 @@ class _MyAppHomeScreenState extends State<MyAppHomeScreen> {
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
+                          color: themeProvider.isDarkMode ? Colors.white : Colors.black,
                         ),
                       ),
                     ),
-                    // for category
                     selectedCategory(),
                     const SizedBox(height: 10),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
+                        Text(
                           "Quick & Easy",
                           style: TextStyle(
                             fontSize: 20,
                             letterSpacing: 0.1,
                             fontWeight: FontWeight.bold,
+                            color: themeProvider.isDarkMode ? Colors.white : Colors.black,
                           ),
                         ),
                         TextButton(
@@ -116,7 +131,6 @@ class _MyAppHomeScreenState extends State<MyAppHomeScreen> {
                       ),
                     );
                   }
-                  // it means if snapshot has date then show the date otherwise show the progress bar
                   return const Center(
                     child: CircularProgressIndicator(),
                   );
@@ -130,6 +144,7 @@ class _MyAppHomeScreenState extends State<MyAppHomeScreen> {
   }
 
   StreamBuilder<QuerySnapshot<Object?>> selectedCategory() {
+    final themeProvider = Provider.of<ThemeProvider>(context);
     return StreamBuilder(
       stream: categoriesItems.snapshots(),
       builder: (context, AsyncSnapshot<QuerySnapshot> streamSnapshot) {
@@ -139,7 +154,7 @@ class _MyAppHomeScreenState extends State<MyAppHomeScreen> {
             child: Row(
               children: List.generate(
                 streamSnapshot.data!.docs.length,
-                (index) => GestureDetector(
+                    (index) => GestureDetector(
                   onTap: () {
                     setState(() {
                       category = streamSnapshot.data!.docs[index]['name'];
@@ -149,9 +164,9 @@ class _MyAppHomeScreenState extends State<MyAppHomeScreen> {
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(25),
                       color:
-                          category == streamSnapshot.data!.docs[index]['name']
-                              ? kprimaryColor
-                              : Colors.white,
+                      category == streamSnapshot.data!.docs[index]['name']
+                          ? kprimaryColor
+                          :  themeProvider.isDarkMode ? Colors.grey[800] : Colors.white, // Change here
                     ),
                     padding: const EdgeInsets.symmetric(
                       horizontal: 20,
@@ -162,9 +177,9 @@ class _MyAppHomeScreenState extends State<MyAppHomeScreen> {
                       streamSnapshot.data!.docs[index]['name'],
                       style: TextStyle(
                         color:
-                            category == streamSnapshot.data!.docs[index]['name']
-                                ? Colors.white
-                                : Colors.grey.shade600,
+                        category == streamSnapshot.data!.docs[index]['name']
+                            ? Colors.white
+                            :   themeProvider.isDarkMode ? Colors.white : Colors.grey.shade600,// Change here
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -174,7 +189,6 @@ class _MyAppHomeScreenState extends State<MyAppHomeScreen> {
             ),
           );
         }
-        // it means if snapshot has date then show the date otherwise show the progress bar
         return const Center(
           child: CircularProgressIndicator(),
         );
@@ -183,38 +197,38 @@ class _MyAppHomeScreenState extends State<MyAppHomeScreen> {
   }
 
   Padding mySearchBar() {
+    final themeProvider = Provider.of<ThemeProvider>(context);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 22),
       child: TextField(
+        controller: _searchController,
+        onChanged: (_) => setState(() {}),
+        style: TextStyle(color: themeProvider.isDarkMode ? Colors.white : Colors.black),
         decoration: InputDecoration(
           filled: true,
-          prefixIcon: const Icon(Iconsax.search_normal),
-          fillColor: Colors.white,
+          prefixIcon: Icon(Iconsax.search_normal, color: themeProvider.isDarkMode ? Colors.white : Colors.black),
+          fillColor: themeProvider.isDarkMode ? Colors.grey[800] : Colors.white,
           border: InputBorder.none,
           hintText: "Search any recipes",
-          hintStyle: const TextStyle(
-            color: Colors.grey,
-          ),
-          enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
-              borderSide: BorderSide.none),
-          focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
-              borderSide: BorderSide.none),
+          hintStyle: TextStyle(color: themeProvider.isDarkMode ? Colors.white : Colors.grey),
+          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
+          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
         ),
       ),
     );
   }
 
   Row headerParts() {
+    final themeProvider = Provider.of<ThemeProvider>(context);
     return Row(
       children: [
-        const Text(
+        Text(
           "What are you\ncooking today?",
           style: TextStyle(
             fontSize: 32,
             fontWeight: FontWeight.bold,
             height: 1,
+            color: themeProvider.isDarkMode ? Colors.white : Colors.black, // Change here
           ),
         ),
         const Spacer(),
