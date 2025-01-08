@@ -66,7 +66,7 @@ class _ViewAllItemsState extends State<ViewAllItems> {
               ),
               onChanged: (value) {
                 setState(() {
-                  searchQuery = value.toLowerCase(); // Update search query
+                  searchQuery = value.toLowerCase(); // Update search queries
                 });
               },
             ),
