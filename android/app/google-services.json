@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "513166297233",
+    "project_id": "food-and-drink-application",
+    "storage_bucket": "food-and-drink-application.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:513166297233:android:cdd88150b548e81ca59730",
+        "android_client_info": {
+          "package_name": "com.example.food_and_drink"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC1qUyO-jSkLITzivgQoIAYUGybw3O6HRQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
