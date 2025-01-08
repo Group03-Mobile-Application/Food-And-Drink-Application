@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import '../Provider/favorite_provider.dart';
 import '../Provider/quantity.dart';
+import '../Provider/theme_provider.dart';
 import '../Utils/constants.dart';
 import '../Widget/my_icon_button.dart';
 import '../Widget/quantity_increment_decrement.dart';
@@ -30,21 +31,18 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
     if (_commentController.text.isNotEmpty) {
       await FirebaseFirestore.instance
           .collection('recipes')
-          .doc(widget.documentSnapshot.id) // Use the current recipe ID
+          .doc(widget.documentSnapshot.id)
           .collection('comments')
           .add({
         'content': _commentController.text,
-        'user': 'Anonymous User', // Replace with authenticated user if available
+        'user': 'Anonymous User',
         'timestamp': FieldValue.serverTimestamp(),
       });
 
-      // Clear the text field after submitting
       _commentController.clear();
     }
 
 
-
-    // Schedule the base amounts to be set after the widget tree is built
     WidgetsBinding.instance.addPostFrameCallback((_) {
       List<double> baseAmounts = widget.documentSnapshot['ingredientsAmount']
           .map<double>((amount) => double.parse(amount.toString()))
@@ -55,21 +53,21 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
     });
   }
 
-// we have a Spelling mistake that's what we face a error, be carefully, all items name must be same in firebase
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
     final provider = FavoriteProvider.of(context);
     final quantityProvider = Provider.of<QuantityProvider>(context);
     return Scaffold(
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: startCookingAndFavoriteButton(provider),
-      backgroundColor: Colors.white,
+      backgroundColor: themeProvider.isDarkMode ?
+      Colors.grey[850] : Colors.white,
       body: SingleChildScrollView(
         child: Column(
           children: [
             Stack(
               children: [
-                // for image
                 Container(
                   height: MediaQuery.of(context).size.height / 2.1,
                   decoration: BoxDecoration(
@@ -89,13 +87,18 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                   child: Row(
                     children: [
                       MyIconButton(
-                          icon: Icons.arrow_back_ios_new,
-                          pressed: () {
-                            Navigator.pop(context);
-                          }),
+                        icon: Icons.arrow_back_ios_new,
+                        pressed: () {
+                          Navigator.pop(context);
+                        },
+                        iconColor: themeProvider.isDarkMode ?
+                        Colors.white : Colors.black,
+                      ),
                       const Spacer(),
                       MyIconButton(
                         icon: Iconsax.notification,
+                        iconColor: themeProvider.isDarkMode ?
+                        Colors.white : Colors.black,
                         pressed: () {},
                       )
                     ],
@@ -109,20 +112,21 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                     width: double.infinity,
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: themeProvider.isDarkMode ?
+                      Colors.grey[800] : Colors.white,
                       borderRadius: BorderRadius.circular(20),
                     ),
                   ),
                 ),
               ],
             ),
-            // for drag handle
             Center(
               child: Container(
                 width: 40,
                 height: 8,
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade300,
+                  color: themeProvider.isDarkMode ?
+                  Colors.grey[700] : Colors.grey.shade300,
                   borderRadius: BorderRadius.circular(20),
                 ),
               ),
@@ -135,25 +139,29 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                 children: [
                   Text(
                     widget.documentSnapshot['name'],
-                    style: const TextStyle(
+                    style:  TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
+                      color: themeProvider.isDarkMode ?
+                      Colors.white : Colors.black,
                     ),
                   ),
                   const SizedBox(height: 10),
                   Row(
                     children: [
-                      const Icon(
+                      Icon(
                         Iconsax.flash_1,
                         size: 20,
-                        color: Colors.grey,
+                        color: themeProvider.isDarkMode ?
+                        Colors.white : Colors.grey,
                       ),
                       Text(
                         "${widget.documentSnapshot['cal']} Cal",
-                        style: const TextStyle(
+                        style:  TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 14,
-                          color: Colors.grey,
+                          color:  themeProvider.isDarkMode ?
+                          Colors.white : Colors.grey,
                         ),
                       ),
                       const Text(
@@ -163,18 +171,20 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                           color: Colors.grey,
                         ),
                       ),
-                      const Icon(
+                      Icon(
                         Iconsax.clock,
                         size: 20,
-                        color: Colors.grey,
+                        color: themeProvider.isDarkMode ?
+                        Colors.white : Colors.grey,
                       ),
                       const SizedBox(width: 5),
                       Text(
                         "${widget.documentSnapshot['time']} Min",
-                        style: const TextStyle(
+                        style:  TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 12,
-                          color: Colors.grey,
+                          color: themeProvider.isDarkMode ?
+                          Colors.white : Colors.grey,
                         ),
                       ),
                     ],
@@ -190,14 +200,17 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                       const SizedBox(width: 5),
                       Text(
                         widget.documentSnapshot['rate'],
-                        style: const TextStyle(
+                        style:  TextStyle(
                           fontWeight: FontWeight.bold,
+                          color: themeProvider.isDarkMode ?
+                          Colors.white : Colors.black,
                         ),
                       ),
                       const Text("/5"),
                       const SizedBox(width: 5),
                       Text(
-                        "${widget.documentSnapshot['reviews'.toString()]} Reviews",
+                        "${widget.documentSnapshot[
+                          'reviews'.toString()]} Reviews",
                         style: const TextStyle(
                           color: Colors.grey,
                         ),
@@ -207,22 +220,25 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                   const SizedBox(height: 20),
                   Row(
                     children: [
-                      const Column(
+                      Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             "Infredients",
-                            style: TextStyle(
+                            style:  TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
+                              color: themeProvider.isDarkMode ?
+                              Colors.white : Colors.black,
                             ),
                           ),
-                          SizedBox(height: 10),
+                          const SizedBox(height: 10),
                           Text(
                             "How many servings?",
                             style: TextStyle(
                               fontSize: 14,
-                              color: Colors.grey,
+                              color:  themeProvider.isDarkMode ?
+                              Colors.white : Colors.grey,
                             ),
                           )
                         ],
@@ -247,20 +263,20 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                                 .documentSnapshot['ingredientsImage']
                                 .map<Widget>(
                                   (imageUrl) => Container(
-                                    height: 60,
-                                    width: 60,
-                                    margin: const EdgeInsets.only(bottom: 10),
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(20),
-                                      image: DecorationImage(
-                                        fit: BoxFit.cover,
-                                        image: NetworkImage(
-                                          imageUrl,
-                                        ),
-                                      ),
+                                height: 60,
+                                width: 60,
+                                margin: const EdgeInsets.only(bottom: 10),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(20),
+                                  image: DecorationImage(
+                                    fit: BoxFit.cover,
+                                    image: NetworkImage(
+                                      imageUrl,
                                     ),
                                   ),
-                                )
+                                ),
+                              ),
+                            )
                                 .toList(),
                           ),
                           const SizedBox(width: 20),
@@ -269,17 +285,18 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: widget.documentSnapshot['ingredientsName']
                                 .map<Widget>((ingredient) => SizedBox(
-                                      height: 60,
-                                      child: Center(
-                                        child: Text(
-                                          ingredient,
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            color: Colors.grey.shade400,
-                                          ),
-                                        ),
-                                      ),
-                                    ))
+                              height: 60,
+                              child: Center(
+                                child: Text(
+                                  ingredient,
+                                  style:  TextStyle(
+                                    fontSize: 16,
+                                    color: themeProvider.isDarkMode ?
+                                    Colors.white : Colors.grey.shade400,
+                                  ),
+                                ),
+                              ),
+                            ))
                                 .toList(),
                           ),
                           // ingredient amount
@@ -287,17 +304,17 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                           Column(
                             children: quantityProvider.updateIngredientAmounts
                                 .map<Widget>((amount) => SizedBox(
-                                      height: 60,
-                                      child: Center(
-                                        child: Text(
-                                          "${amount}gm",
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            color: Colors.grey.shade400,
-                                          ),
-                                        ),
-                                      ),
-                                    ))
+                              height: 60,
+                              child: Center(
+                                child: Text(
+                                  "${amount}gm",
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.grey.shade400,
+                                  ),
+                                ),
+                              ),
+                            ))
                                 .toList(),
                           ),
                         ],
@@ -310,20 +327,35 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
+                        Divider(
+                          thickness: 1,
+                          color: themeProvider.isDarkMode ?
+                          Colors.grey[600]! : Colors.grey,
+                        ),
+                        const SizedBox(height: 10),
+                        Text(
                           "Comments",
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
+                            color: themeProvider.isDarkMode ?
+                            Colors.white : Colors.black,
                           ),
                         ),
                         const SizedBox(height: 10),
                         TextField(
                           controller: _commentController,
+                          style:  TextStyle(color: themeProvider.isDarkMode ?
+                          Colors.white : Colors.black),
                           decoration: InputDecoration(
                             hintText: "Add a comment...",
+                            hintStyle:  TextStyle(
+                                color: themeProvider.isDarkMode ?
+                                Colors.white : Colors.grey),
                             suffixIcon: IconButton(
-                              icon: const Icon(Icons.send),
+                              icon:  Icon(Icons.send,
+                                color: themeProvider.isDarkMode ?
+                                Colors.white : Colors.black,),
                               onPressed: _addComment,
                             ),
                             border: OutlineInputBorder(
@@ -347,7 +379,10 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                             }
                             final comments = snapshot.data!.docs;
                             if (comments.isEmpty) {
-                              return const Text("No comments yet. Be the first!");
+                              return  Text("No comments yet. Be the first!",
+                                  style: TextStyle(
+                                      color: themeProvider.isDarkMode ?
+                                      Colors.white : Colors.black));
                             }
                             return ListView.builder(
                               shrinkWrap: true,
@@ -356,15 +391,24 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                               itemBuilder: (context, index) {
                                 final comment = comments[index];
                                 return ListTile(
-                                  title: Text(comment['content']),
-                                  subtitle: Text(comment['user']),
+                                  title:  Text(comment['content'],
+                                      style: TextStyle(
+                                          color: themeProvider.isDarkMode ?
+                                          Colors.white : Colors.black)),
+                                  subtitle: Text(comment['user'],
+                                      style: TextStyle(
+                                          color: themeProvider.isDarkMode ?
+                                          Colors.white : Colors.grey)),
                                   trailing: Text(
                                     (comment['timestamp'] as Timestamp?)
                                         ?.toDate()
                                         .toString()
                                         .substring(0, 16) ??
                                         "Just now",
-                                    style: const TextStyle(fontSize: 12),
+                                    style: TextStyle(
+                                        fontSize: 12,
+                                        color: themeProvider.isDarkMode ?
+                                        Colors.white : Colors.grey),
                                   ),
                                 );
                               },
@@ -387,9 +431,9 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
   }
 
 
-
   FloatingActionButton startCookingAndFavoriteButton(
       FavoriteProvider provider) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
     return FloatingActionButton.extended(
       backgroundColor: Colors.transparent,
       elevation: 0,
@@ -400,7 +444,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
             style: ElevatedButton.styleFrom(
                 backgroundColor: kprimaryColor,
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 100, vertical: 13),
+                const EdgeInsets.symmetric(horizontal: 100, vertical: 13),
                 foregroundColor: Colors.white),
             onPressed: () {},
             child: const Text(
@@ -416,7 +460,8 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
             style: IconButton.styleFrom(
               shape: CircleBorder(
                 side: BorderSide(
-                  color: Colors.grey.shade300,
+                  color:themeProvider.isDarkMode ?
+                  Colors.grey.shade600 : Colors.grey.shade300,
                   width: 2,
                 ),
               ),
