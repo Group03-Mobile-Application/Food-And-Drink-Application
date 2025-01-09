@@ -23,6 +23,7 @@ class RecipeDetailScreen extends StatefulWidget {
 class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
   final TextEditingController _commentController = TextEditingController();
   YoutubePlayerController? _youtubeController;
+  bool isInitialized = false;
 
 
   @override
@@ -31,6 +32,23 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
     super.dispose();
     _youtubeController?.dispose();
     super.dispose();
+  }
+
+
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!isInitialized) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        // Initialize base ingredient amounts in the provider
+        List<double> baseAmounts = (widget
+            .documentSnapshot['ingredientsAmount'] ?? [])
+            .map<double>((amount) => double.tryParse(amount.toString()) ?? 0.0)
+            .toList();
+        Provider.of<QuantityProvider>(context, listen: false)
+            .setBaseIngredientAmounts(baseAmounts);
+      });
+      isInitialized = true;
+    }
   }
 
   Future<void> _addComment() async {
@@ -60,33 +78,33 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
       );
     }
   }
-   void _showVideoDialog() {
-     if (_youtubeController == null) {
-       ScaffoldMessenger.of(context).showSnackBar(
-         const SnackBar(content: Text('No video link available')),
-       );
-       return;
-     }
-     showDialog(
-       context: context,
-       builder: (context) =>
-           AlertDialog(
-             content: AspectRatio(
-               aspectRatio: 16 / 9,
-               child: YoutubePlayer(
-                 controller: _youtubeController!,
-                 showVideoProgressIndicator: true,
-               ),
-             ),
-             actions: [
-               TextButton(
-                 onPressed: () => Navigator.of(context).pop(),
-                 child: const Text('Close'),
-               ),
-             ],
-           ),
-     );
-   }
+  void _showVideoDialog() {
+    if (_youtubeController == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No video link available')),
+      );
+      return;
+    }
+    showDialog(
+      context: context,
+      builder: (context) =>
+          AlertDialog(
+            content: AspectRatio(
+              aspectRatio: 16 / 9,
+              child: YoutubePlayer(
+                controller: _youtubeController!,
+                showVideoProgressIndicator: true,
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Close'),
+              ),
+            ],
+          ),
+    );
+  }
 
   void _editComment(DocumentSnapshot comment) {
     final TextEditingController _editController = TextEditingController(
@@ -134,16 +152,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
       ),
     );
 
-
-     WidgetsBinding.instance.addPostFrameCallback((_) {
-      List<double> baseAmounts = widget.documentSnapshot['ingredientsAmount']
-          .map<double>((amount) => double.parse(amount.toString()))
-          .toList();
-
-      Provider.of<QuantityProvider>(context, listen: false)
-          .setBaseIngredientAmounts(baseAmounts);
-    });
-  }
+    }
 
   @override
   Widget build(BuildContext context) {
@@ -402,7 +411,8 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                                   "${amount}gm",
                                   style: TextStyle(
                                     fontSize: 16,
-                                    color: Colors.grey.shade400,
+                                    color: themeProvider.isDarkMode ?
+                                    Colors.white : Colors.grey.shade400,
                                   ),
                                 ),
                               ),
