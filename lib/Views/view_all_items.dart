@@ -1,7 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:provider/provider.dart';
 
+import '../Provider/theme_provider.dart';
 import '../Utils/constants.dart';
 import '../Widget/food_items_display.dart';
 import '../Widget/my_icon_button.dart';
@@ -20,8 +22,10 @@ class _ViewAllItemsState extends State<ViewAllItems> {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
     return Scaffold(
-      backgroundColor: kbackgroundColor,
+      backgroundColor: themeProvider.isDarkMode ?
+      Colors.grey[850] : kbackgroundColor, // Change here
       appBar: AppBar(
         backgroundColor: kbackgroundColor,
         automaticallyImplyLeading: false, // it removes the app bar back button
@@ -33,19 +37,22 @@ class _ViewAllItemsState extends State<ViewAllItems> {
             pressed: () {
               Navigator.pop(context);
             },
+            iconColor: themeProvider.isDarkMode ? Colors.white : Colors.black,
           ),
           const Spacer(),
-          const Text(
+          Text(
             "Quick & Easy",
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
+              color: themeProvider.isDarkMode ? Colors.white : Colors.black,
             ),
           ),
           const Spacer(),
           MyIconButton(
             icon: Iconsax.notification,
             pressed: () {},
+            iconColor: themeProvider.isDarkMode ? Colors.white : Colors.black,
           ),
           const SizedBox(width: 15),
         ],
@@ -112,16 +119,22 @@ class _ViewAllItemsState extends State<ViewAllItems> {
                               const SizedBox(width: 5),
                               Text(
                                 documentSnapshot['rate'],
-                                style: const TextStyle(
+                                style:  TextStyle(
                                   fontWeight: FontWeight.bold,
+                                  color: themeProvider.isDarkMode ?
+                                  Colors.white : Colors.black,
                                 ),
                               ),
-                              const Text("/5"),
+                              Text("/5", style:  TextStyle(color:
+                              themeProvider.isDarkMode ?
+                              Colors.white : Colors.black,)),
                               const SizedBox(width: 5),
                               Text(
-                                "${documentSnapshot['reviews'.toString()]} Reviews",
-                                style: const TextStyle(
-                                  color: Colors.grey,
+                                "${documentSnapshot[
+                                'reviews'.toString()]} Reviews",
+                                style:  TextStyle(
+                                  color:  themeProvider.isDarkMode ?
+                                  Colors.white : Colors.grey,
                                 ),
                               ),
                             ],
@@ -131,7 +144,6 @@ class _ViewAllItemsState extends State<ViewAllItems> {
                     },
                   );
                 }
-                // If no data is available, show a loading indicator
                 return const Center(
                   child: CircularProgressIndicator(),
                 );

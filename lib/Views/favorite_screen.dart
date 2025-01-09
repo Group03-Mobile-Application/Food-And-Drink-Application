@@ -4,6 +4,7 @@ import 'package:iconsax/iconsax.dart';
 import 'package:provider/provider.dart';
 
 import '../Provider/favorite_provider.dart';
+import '../Provider/theme_provider.dart';
 import '../Utils/constants.dart';
 import 'recipe_detail_screen.dart';
 
@@ -59,6 +60,9 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    final provider = FavoriteProvider.of(context);
+    final favoriteItems = provider.favorites;
     // Filter favorites based on search query and selected category
     final filteredFavorites = favoriteData.where((item) {
       final matchesSearch = item['name']
@@ -70,14 +74,17 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
     }).toList();
 
     return Scaffold(
-      backgroundColor: kbackgroundColor,
+      backgroundColor: themeProvider.isDarkMode ?
+      Colors.grey[850] : kbackgroundColor, // Change here
       appBar: AppBar(
-        backgroundColor: kbackgroundColor,
+        backgroundColor: themeProvider.isDarkMode ?
+        Colors.grey[850] : kbackgroundColor, // Change here
         centerTitle: true,
-        title: const Text(
+        title:  Text(
           "Favorites",
           style: TextStyle(
             fontWeight: FontWeight.bold,
+            color:  themeProvider.isDarkMode ? Colors.white : Colors.black,
           ),
         ),
         bottom: PreferredSize(
@@ -114,259 +121,144 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
           ),
         ),
       ),
-      body: isLoading
-          ? const Center(
-              child: CircularProgressIndicator(),
-            )
-          : filteredFavorites.isEmpty
-              ? const Center(
-                  child: Text(
-                    "No Favorites found",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                )
-              : ListView.builder(
-                  itemCount: filteredFavorites.length,
-                  itemBuilder: (context, index) {
-                    var favoriteItem = filteredFavorites[index];
-                    return GestureDetector(
-                      onTap: () async {
-                        // Fetch the document snapshot for the selected favorite item
-                        DocumentSnapshot doc = await FirebaseFirestore.instance
-                            .collection("Food-And-Drink-Application")
-                            .doc(favoriteItem['id'])
-                            .get();
-
-                        // Navigate to RecipeDetailScreen
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => RecipeDetailScreen(
-                              documentSnapshot: doc,
-                            ),
-                          ),
-                        );
-                      },
-                      child: Dismissible(
-                        key: Key(favoriteItem['id']),
-                        direction: DismissDirection.endToStart,
-                        onDismissed: (direction) async {
-                          // Remove the item from Firestore and local list
-                          DocumentSnapshot snapshot = await FirebaseFirestore.instance
-                              .collection("Food-And-Drink-Application")
-                              .doc(favoriteItem['id'])
-                              .get();
-
-                          if (!mounted) return;
-
-                          final provider =
-                              Provider.of<FavoriteProvider>(context, listen: false);
-                          provider.toggleFavorite(snapshot);
-
-                          setState(() {
-                            favoriteData.remove(favoriteItem);
-                          });
-
-                          // Show confirmation SnackBar
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                "${favoriteItem['name']} removed from favorites.",
+      body: favoriteItems.isEmpty
+          ?  Center(
+        child: Text(
+          "No Favorites yet",
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: themeProvider.isDarkMode ? Colors.white : Colors.black,
+          ),
+        ),
+      )
+          : ListView.builder(
+        itemCount: favoriteItems.length,
+        itemBuilder: (context, index) {
+          String favorite = favoriteItems[index];
+          return FutureBuilder<DocumentSnapshot>(
+            future: FirebaseFirestore.instance
+                .collection("Food-And-Drink-Application")
+                .doc(favorite)
+                .get(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
+              if (!snapshot.hasData || snapshot.data == null) {
+                return const Center(
+                  child: Text("Error loading favorites"),
+                );
+              }
+              var favoriteItem = snapshot.data!;
+              return Stack(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(15),
+                    child: Container(
+                      padding: const EdgeInsets.all(10),
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        color: themeProvider.isDarkMode ? Colors.grey[800] : Colors.white,
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 100,
+                            height: 80,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(20),
+                              image: DecorationImage(
+                                fit: BoxFit.cover,
+                                image: NetworkImage(
+                                  favoriteItem['image'],
+                                ),
                               ),
                             ),
-                          );
-                        },
-                        background: Container(
-                          color: Colors.red,
-                          alignment: Alignment.centerRight,
-                          padding: const EdgeInsets.only(right: 20),
-                          child: const Icon(
-                            Icons.delete,
-                            color: Colors.white,
-                            size: 30,
                           ),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(15),
-                          child: Container(
-                            padding: const EdgeInsets.all(10),
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(20),
-                              color: Colors.white,
-                            ),
-                            child: Row(
-                              children: [
-                                // Recipe Image
-                                Container(
-                                  width: 100,
-                                  height: 80,
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(20),
-                                    image: DecorationImage(
-                                      fit: BoxFit.cover,
-                                      image: NetworkImage(
-                                        favoriteItem['image'],
-                                      ),
+                          const SizedBox(width: 10),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                favoriteItem['name'],
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                  color: themeProvider.isDarkMode ? Colors.white : Colors.black,
+                                ),
+                              ),
+                              const SizedBox(height: 5),
+                              Row(
+                                children: [
+                                  const Icon(
+                                    Iconsax.flash_1,
+                                    size: 16,
+                                    color: Colors.grey,
+                                  ),
+                                  Text(
+                                    "${favoriteItem['cal']} Cal",
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12,
+                                      color: Colors.grey,
                                     ),
                                   ),
-                                ),
-                                const SizedBox(width: 10),
-                                // Recipe Details
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        favoriteItem['name'],
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 16,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 5),
-                                      Row(
-                                        children: [
-                                          const Icon(
-                                            Iconsax.flash_1,
-                                            size: 16,
-                                            color: Colors.grey,
-                                          ),
-                                          Text(
-                                            "${favoriteItem['cal']} Cal",
-                                            style: const TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 12,
-                                              color: Colors.grey,
-                                            ),
-                                          ),
-                                          const Text(
-                                            " · ",
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.w900,
-                                              color: Colors.grey,
-                                            ),
-                                          ),
-                                          const Icon(
-                                            Iconsax.clock,
-                                            size: 16,
-                                            color: Colors.grey,
-                                          ),
-                                          const SizedBox(width: 5),
-                                          Text(
-                                            "${favoriteItem['time']} Min",
-                                            style: const TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 12,
-                                              color: Colors.grey,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
+                                  const Text(
+                                    " · ",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w900,
+                                      color: Colors.grey,
+                                    ),
                                   ),
-                                ),
-                                // Delete Button
-                                IconButton(
-                                  icon: const Icon(
-                                    Icons.delete,
-                                    color: Colors.red,
+                                  const Icon(
+                                    Iconsax.clock,
+                                    size: 16,
+                                    color: Colors.grey,
                                   ),
-                                  onPressed: () async {
-                                    // Remove the item from Firestore and local list
-                                    DocumentSnapshot snapshot =
-                                        await FirebaseFirestore.instance
-                                            .collection(
-                                                "Food-And-Drink-Application")
-                                            .doc(favoriteItem['id'])
-                                            .get();
-
-                                    if (!mounted) return;
-
-                                    final provider = Provider.of<FavoriteProvider>(
-                                        context,
-                                        listen: false);
-                                    provider.toggleFavorite(snapshot);
-
-                                    setState(() {
-                                      favoriteData.remove(favoriteItem);
-                                    });
-
-                                    // Show confirmation SnackBar
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                          "${favoriteItem['name']} removed from favorites.",
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-    );
-  }
-
-  // Category selection widget
-  Widget selectedCategory() {
-    return StreamBuilder(
-      stream: categoriesItems.snapshots(),
-      builder: (context, AsyncSnapshot<QuerySnapshot> streamSnapshot) {
-        if (streamSnapshot.hasData) {
-          return SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: List.generate(
-                streamSnapshot.data!.docs.length,
-                (index) => GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      category = streamSnapshot.data!.docs[index]['name'];
-                    });
-                  },
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(25),
-                      color:
-                          category == streamSnapshot.data!.docs[index]['name']
-                              ? kprimaryColor
-                              : Colors.white,
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 10,
-                    ),
-                    margin: const EdgeInsets.only(right: 10),
-                    child: Text(
-                      streamSnapshot.data!.docs[index]['name'],
-                      style: TextStyle(
-                        color:
-                            category == streamSnapshot.data!.docs[index]['name']
-                                ? Colors.white
-                                : Colors.grey.shade600,
-                        fontWeight: FontWeight.w600,
+                                  const SizedBox(width: 5),
+                                  Text(
+                                    "${favoriteItem['time']} Min",
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                ],
+                              )
+                            ],
+                          )
+                        ],
                       ),
                     ),
                   ),
-                ),
-              ),
-            ),
+                  Positioned(
+                    top: 50,
+                    right: 35,
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          provider.toggleFavorite(favoriteItem);
+                        });
+                      },
+                      child: const Icon(
+                        Icons.delete,
+                        color: Colors.red,
+                        size: 25,
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
           );
-        }
-        return const Center(
-          child: CircularProgressIndicator(),
-        );
-      },
+        },
+      ),
     );
   }
 }
