@@ -16,10 +16,10 @@ class FavoriteProvider extends ChangeNotifier {
     String productId = product.id;
     if (_favoriteIds.contains(productId)) {
       _favoriteIds.remove(productId);
-      await _removeFavorite(productId); // remove from favorite
+      await _removeFavorite(productId);
     } else {
       _favoriteIds.add(productId);
-      await _addFavorite(productId); // add to favorite
+      await _addFavorite(productId);
     }
     notifyListeners();
   }
@@ -34,7 +34,7 @@ class FavoriteProvider extends ChangeNotifier {
     try {
       await _firestore.collection("userFavorite").doc(productId).set({
         'isFavorite':
-        true, // create the userFavorite collection and add item as favorites inf firestore
+        true,
       });
     } catch (e) {
       print(e.toString());
