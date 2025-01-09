@@ -4,12 +4,21 @@ import 'package:food_and_drink/views/app_main_screen.dart';
 import 'package:provider/provider.dart';
 import '../Provider/favorite_provider.dart';
 import 'Provider/quantity.dart';
-
+import 'Provider/theme_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => FavoriteProvider()),
+        ChangeNotifierProvider(create: (_) => QuantityProvider()),
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -17,17 +26,6 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        // for favorite providers
-        ChangeNotifierProvider(create: (_)=>FavoriteProvider()),
-        // for quantity providers
-        ChangeNotifierProvider(create: (_) => QuantityProvider()),
-      ],
-      child: const MaterialApp(
-        debugShowCheckedModeBanner: false,
-        home: AppMainScreen(),
-      ),
     final themeProvider = Provider.of<ThemeProvider>(context);
     return MaterialApp(
       debugShowCheckedModeBanner: false,

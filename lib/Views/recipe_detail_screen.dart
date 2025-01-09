@@ -325,7 +325,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            "Infredients",
+                            "Ingredients",
                             style:  TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
@@ -408,7 +408,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                               height: 60,
                               child: Center(
                                 child: Text(
-                                  "${amount}gm",
+                                  "${amount}g",
                                   style: TextStyle(
                                     fontSize: 16,
                                     color: themeProvider.isDarkMode ?
