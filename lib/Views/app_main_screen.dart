@@ -3,6 +3,7 @@ import 'package:iconsax/iconsax.dart';
 
 import '../Utils/constants.dart';
 import 'favorite_screen.dart';
+import 'meal_plan_screen.dart';
 import 'my_app_home_screen.dart';
 
 class AppMainScreen extends StatefulWidget {
@@ -20,7 +21,7 @@ class _AppMainScreenState extends State<AppMainScreen> {
     page = [ 
     const  MyAppHomeScreen(),
      const FavoriteScreen(),
-      navBarPage(Iconsax.calendar5),
+      const MealPlanScreen(),
       navBarPage(Iconsax.setting_21),
     ];
 
