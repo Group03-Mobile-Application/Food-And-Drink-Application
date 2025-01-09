@@ -6,7 +6,6 @@ import 'package:provider/provider.dart';
 import '../Provider/favorite_provider.dart';
 import '../Provider/theme_provider.dart';
 import '../Utils/constants.dart';
-import 'recipe_detail_screen.dart';
 
 class FavoriteScreen extends StatefulWidget {
   const FavoriteScreen({super.key});
@@ -74,28 +73,25 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
     }).toList();
 
     return Scaffold(
-      backgroundColor: themeProvider.isDarkMode ?
-      Colors.grey[850] : kbackgroundColor, // Change here
+      backgroundColor: kbackgroundColor,
       appBar: AppBar(
-        backgroundColor: themeProvider.isDarkMode ?
-        Colors.grey[850] : kbackgroundColor, // Change here
+        backgroundColor: kbackgroundColor,
         centerTitle: true,
-        title:  Text(
+        title: const Text(
           "Favorites",
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            color:  themeProvider.isDarkMode ? Colors.white : Colors.black,
           ),
         ),
       ),
+
       body: favoriteItems.isEmpty
-          ?  Center(
+          ? const Center(
         child: Text(
           "No Favorites yet",
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: themeProvider.isDarkMode ? Colors.white : Colors.black,
           ),
         ),
       )
@@ -129,7 +125,7 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
                       width: double.infinity,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(20),
-                        color: themeProvider.isDarkMode ? Colors.grey[800] : Colors.white,
+                        color: Colors.white,
                       ),
                       child: Row(
                         children: [
@@ -153,10 +149,9 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
                             children: [
                               Text(
                                 favoriteItem['name'],
-                                style: TextStyle(
+                                style: const TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 16,
-                                  color: themeProvider.isDarkMode ? Colors.white : Colors.black,
                                 ),
                               ),
                               const SizedBox(height: 5),
@@ -204,6 +199,7 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
                       ),
                     ),
                   ),
+                  // for delete button
                   Positioned(
                     top: 50,
                     right: 35,
