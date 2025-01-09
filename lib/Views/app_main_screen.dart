@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:food_and_drink/Views/meal_plan_screen.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:provider/provider.dart';
 
 import '../Utils/constants.dart';
 import 'favorite_screen.dart';
@@ -15,26 +16,28 @@ class AppMainScreen extends StatefulWidget {
 
 class _AppMainScreenState extends State<AppMainScreen> {
   int selectedIndex = 0;
-  late final List<Widget> page;
-  @override
-  void initState() {
-    page = [ 
-    const  MyAppHomeScreen(),
-     const FavoriteScreen(),
-      const MealPlanScreen(),
-      navBarPage(Iconsax.calendar5),
-      navBarPage(Iconsax.setting_21),
-    ];
+  late List<Widget> page;
+  late ThemeProvider themeProvider;
 
-    super.initState();
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    themeProvider = Provider.of<ThemeProvider>(context);
+
+    page = [
+      const MyAppHomeScreen(),
+      const FavoriteScreen(),
+      navBarPage(Iconsax.calendar5),
+      Container(),
+    ];
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: themeProvider.isDarkMode ? Colors.grey[900] : Colors.white, // Change here
       bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Colors.white,
+        backgroundColor:themeProvider.isDarkMode ? Colors.grey[800] : Colors.white, // Change here
         elevation: 0,
         iconSize: 28,
         currentIndex: selectedIndex,
@@ -50,9 +53,13 @@ class _AppMainScreenState extends State<AppMainScreen> {
           fontWeight: FontWeight.w500,
         ),
         onTap: (value) {
-          setState(() {
-            selectedIndex = value;
-          });
+          if (value == 3) {
+            themeProvider.toggleTheme();
+          } else {
+            setState(() {
+              selectedIndex = value;
+            });
+          }
         },
         items: [
           BottomNavigationBarItem(
@@ -75,9 +82,9 @@ class _AppMainScreenState extends State<AppMainScreen> {
           ),
           BottomNavigationBarItem(
             icon: Icon(
-              selectedIndex == 3 ? Iconsax.setting_21 : Iconsax.setting_2,
+              themeProvider.isDarkMode ? Icons.light_mode : Icons.dark_mode,
             ),
-            label: "Setting",
+            label: "Theme",
           ),
         ],
       ),
@@ -85,12 +92,12 @@ class _AppMainScreenState extends State<AppMainScreen> {
     );
   }
 
-  navBarPage(iconName) {
+  Widget navBarPage(iconName) {
     return Center(
       child: Icon(
         iconName,
         size: 100,
-        color: kprimaryColor,
+        color: themeProvider.isDarkMode ? Colors.white : kprimaryColor,
       ),
     );
   }
