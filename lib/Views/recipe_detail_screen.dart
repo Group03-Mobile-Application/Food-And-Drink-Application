@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:provider/provider.dart';
 
+
 import '../Provider/favorite_provider.dart';
 import '../Provider/quantity.dart';
 import '../Utils/constants.dart';

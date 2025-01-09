@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:food_and_drink/Views/meal_plan_screen.dart';
 import 'package:iconsax/iconsax.dart';
 
 import '../Utils/constants.dart';
@@ -20,6 +21,7 @@ class _AppMainScreenState extends State<AppMainScreen> {
     page = [ 
     const  MyAppHomeScreen(),
      const FavoriteScreen(),
+      const MealPlanScreen(),
       navBarPage(Iconsax.calendar5),
       navBarPage(Iconsax.setting_21),
     ];
