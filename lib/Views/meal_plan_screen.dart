@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:path/path.dart' as p;
 import 'package:sqflite/sqflite.dart';
+
 class MealPlanDatabaseHelper {
 
   static final MealPlanDatabaseHelper instance = MealPlanDatabaseHelper._init();
@@ -99,7 +100,7 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
             children: [
               DropdownButton<String>(
                 value: mealType,
-                items: ['Breakfast', 'Lunch', 'Dinner', 'Snack']
+                items: ['Breakfast', 'Lunch', 'Dinner', 'Dessert']
                     .map((type) => DropdownMenuItem(
                   value: type,
                   child: Text(type),
@@ -162,8 +163,8 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.orange,
-        title: const Text('Diet Plan'),
+        backgroundColor: Color(0xff0cb3ab),
+        title: const Text('Meal Plan'),
       ),
       body: Column(
         children: [
