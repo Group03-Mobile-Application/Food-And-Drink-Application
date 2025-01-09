@@ -17,9 +17,8 @@ class ViewAllItems extends StatefulWidget {
 
 class _ViewAllItemsState extends State<ViewAllItems> {
   final CollectionReference completeApp =
-  FirebaseFirestore.instance.collection("Food-And-Drink-Application");
-
-
+      FirebaseFirestore.instance.collection("Food-And-Drink-Application");
+  String searchQuery = "";
 
   @override
   Widget build(BuildContext context) {
@@ -58,6 +57,29 @@ class _ViewAllItemsState extends State<ViewAllItems> {
           ),
           const SizedBox(width: 15),
         ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(50),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 10),
+            child: TextField(
+              decoration: InputDecoration(
+                hintText: "Search items...",
+                prefixIcon: const Icon(Icons.search),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(15),
+                  borderSide: BorderSide.none,
+                ),
+                filled: true,
+                fillColor: Colors.white,
+              ),
+              onChanged: (value) {
+                setState(() {
+                  searchQuery = value.toLowerCase(); // Update search queries
+                });
+              },
+            ),
+          ),
+        ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.only(left: 15, right: 5),
@@ -68,9 +90,14 @@ class _ViewAllItemsState extends State<ViewAllItems> {
               stream: completeApp.snapshots(),
               builder: (context, AsyncSnapshot<QuerySnapshot> streamSnapshot) {
                 if (streamSnapshot.hasData) {
-                  return GridView.builder(
+                  // Filter items based on the search query
+                  final filteredDocs = streamSnapshot.data!.docs.where((doc) {
+                    final itemName = (doc['name'] ?? '').toString().toLowerCase();
+                    return itemName.contains(searchQuery);
+                  }).toList();
 
-                    itemCount: streamSnapshot.data!.docs.length,
+                  return GridView.builder(
+                    itemCount: filteredDocs.length,
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     gridDelegate:
@@ -80,7 +107,7 @@ class _ViewAllItemsState extends State<ViewAllItems> {
                     ),
                     itemBuilder: (context, index) {
                       final DocumentSnapshot documentSnapshot =
-                      streamSnapshot.data!.docs[index];
+                          filteredDocs[index];
 
                       return Column(
                         children: [
@@ -119,6 +146,7 @@ class _ViewAllItemsState extends State<ViewAllItems> {
                     },
                   );
                 }
+                // If no data is available, show a loading indicator
                 return const Center(
                   child: CircularProgressIndicator(),
                 );
