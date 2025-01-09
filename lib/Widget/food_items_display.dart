@@ -1,9 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-
 import 'package:iconsax/iconsax.dart';
-import '../Provider/favorite_provider.dart';
 
+import '../Provider/favorite_provider.dart';
+import '../Views/recipe_detail_screen.dart';
 
 class FoodItemsDisplay extends StatelessWidget {
   final DocumentSnapshot<Object?> documentSnapshot;
@@ -13,7 +13,7 @@ class FoodItemsDisplay extends StatelessWidget {
   Widget build(BuildContext context) {
     final provider = FavoriteProvider.of(context);
     return GestureDetector(
-      /*onTap: () {
+      onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -21,7 +21,7 @@ class FoodItemsDisplay extends StatelessWidget {
                 RecipeDetailScreen(documentSnapshot: documentSnapshot),
           ),
         );
-      },*/
+      },
       child: Container(
         margin: const EdgeInsets.only(right: 10),
         width: 230,
@@ -93,6 +93,7 @@ class FoodItemsDisplay extends StatelessWidget {
               ],
             ),
             // for favorite button
+            // now let's whok on favorite button using provider
             Positioned(
               top: 5,
               right: 5,
@@ -115,6 +116,7 @@ class FoodItemsDisplay extends StatelessWidget {
                 ),
               ),
             ),
+            // lets design a favorite screen
           ],
         ),
       ),

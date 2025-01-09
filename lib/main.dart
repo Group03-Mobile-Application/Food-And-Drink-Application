@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:food_and_drink/views/app_main_screen.dart';
 import 'package:provider/provider.dart';
 import '../Provider/favorite_provider.dart';
+import 'Provider/quantity.dart';
 
 
 void main() async {
@@ -21,7 +22,7 @@ class MyApp extends StatelessWidget {
         // for favorite provider
         ChangeNotifierProvider(create: (_)=>FavoriteProvider()),
         // for quantity provider
-       /* ChangeNotifierProvider(create: (_) => QuantityProvider()),*/
+        ChangeNotifierProvider(create: (_) => QuantityProvider()),
       ],
       child: const MaterialApp(
         debugShowCheckedModeBanner: false,

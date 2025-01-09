@@ -3,7 +3,7 @@ import 'package:iconsax/iconsax.dart';
 
 import '../Utils/constants.dart';
 import 'favorite_screen.dart';
-import 'home_screen.dart';
+import 'my_app_home_screen.dart';
 
 class AppMainScreen extends StatefulWidget {
   const AppMainScreen({super.key});

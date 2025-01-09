@@ -1,12 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:food_and_drink/Provider/favorite_provider.dart';
-import 'package:food_and_drink/Provider/quantity.dart';
-import 'package:food_and_drink/Utils/constants.dart';
-import 'package:food_and_drink/Widget/my_icon_button.dart';
-import 'package:food_and_drink/Widget/quantity_increment_decrement.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:provider/provider.dart';
+
+import '../Provider/favorite_provider.dart';
+import '../Provider/quantity.dart';
+import '../Utils/constants.dart';
+import '../Widget/my_icon_button.dart';
+import '../Widget/quantity_increment_decrement.dart';
 
 class RecipeDetailScreen extends StatefulWidget {
   final DocumentSnapshot<Object?> documentSnapshot;
@@ -17,22 +18,29 @@ class RecipeDetailScreen extends StatefulWidget {
 }
 
 class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
+  bool isInitialized = false;
+
   @override
-  void initState() {
-    // initialize base ingredient amounts in the provider
-    List<double> baseAmounts = widget.documentSnapshot['ingredientsAmount']
-        .map<double>((amount) => double.parse(amount.toString()))
-        .toList();
-    Provider.of<QuantityProvider>(context, listen: false)
-        .setBaseIngredientAmounts(baseAmounts);
-    super.initState();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!isInitialized) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        // Initialize base ingredient amounts in the provider
+        List<double> baseAmounts = (widget.documentSnapshot['ingredientsAmount'] ?? [])
+            .map<double>((amount) => double.tryParse(amount.toString()) ?? 0.0)
+            .toList();
+        Provider.of<QuantityProvider>(context, listen: false)
+            .setBaseIngredientAmounts(baseAmounts);
+      });
+      isInitialized = true;
+    }
   }
 
-// we have a Spelling mistake that's what we face a error, be carefully, all items name must be same in firebase
   @override
   Widget build(BuildContext context) {
     final provider = FavoriteProvider.of(context);
     final quantityProvider = Provider.of<QuantityProvider>(context);
+
     return Scaffold(
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: startCookingAndFavoriteButton(provider),
@@ -42,19 +50,19 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
           children: [
             Stack(
               children: [
-                // for image
+                // Recipe Image
                 Container(
                   height: MediaQuery.of(context).size.height / 2.1,
                   decoration: BoxDecoration(
                     image: DecorationImage(
                       fit: BoxFit.cover,
                       image: NetworkImage(
-                        widget.documentSnapshot['image'],
+                        widget.documentSnapshot['image'] ?? '',
                       ),
                     ),
                   ),
                 ),
-                // for back button
+                // Back Button and Notifications
                 Positioned(
                   top: 40,
                   left: 10,
@@ -74,6 +82,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                     ],
                   ),
                 ),
+                // Recipe Details Container
                 Positioned(
                   left: 0,
                   right: 0,
@@ -89,7 +98,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                 ),
               ],
             ),
-            // for drag handle
+            // Drag Handle
             Center(
               child: Container(
                 width: 40,
@@ -106,14 +115,16 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Recipe Name
                   Text(
-                    widget.documentSnapshot['name'],
+                    widget.documentSnapshot['name'] ?? 'Unknown Recipe',
                     style: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   const SizedBox(height: 10),
+                  // Calories and Time
                   Row(
                     children: [
                       const Icon(
@@ -122,7 +133,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                         color: Colors.grey,
                       ),
                       Text(
-                        "${widget.documentSnapshot['cal']} Cal",
+                        "${widget.documentSnapshot['cal'] ?? '0'} Cal",
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 14,
@@ -143,7 +154,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                       ),
                       const SizedBox(width: 5),
                       Text(
-                        "${widget.documentSnapshot['time']} Min",
+                        "${widget.documentSnapshot['time'] ?? '0'} Min",
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 12,
@@ -153,7 +164,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                     ],
                   ),
                   const SizedBox(height: 10),
-                  // for rating
+                  // Rating and Reviews
                   Row(
                     children: [
                       const Icon(
@@ -162,7 +173,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                       ),
                       const SizedBox(width: 5),
                       Text(
-                        widget.documentSnapshot['rate'],
+                        widget.documentSnapshot['rate'] ?? '0',
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                         ),
@@ -170,7 +181,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                       const Text("/5"),
                       const SizedBox(width: 5),
                       Text(
-                        "${widget.documentSnapshot['reviews'.toString()]} Reviews",
+                        "${widget.documentSnapshot['reviews'] ?? '0'} Reviews",
                         style: const TextStyle(
                           color: Colors.grey,
                         ),
@@ -178,13 +189,14 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                     ],
                   ),
                   const SizedBox(height: 20),
+                  // Ingredients Section
                   Row(
                     children: [
                       const Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            "Infredients",
+                            "Ingredients",
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
@@ -209,68 +221,65 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                     ],
                   ),
                   const SizedBox(height: 10),
-                  // list of ingredients
+                  // Ingredients List
                   Column(
                     children: [
                       Row(
                         children: [
-                          // ingredients images
+                          // Ingredients Images
                           Column(
-                            children: widget
-                                .documentSnapshot['ingredientsImage']
+                            children: (widget.documentSnapshot['ingredientsImage'] ?? [])
                                 .map<Widget>(
                                   (imageUrl) => Container(
-                                height: 60,
-                                width: 60,
-                                margin: const EdgeInsets.only(bottom: 10),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(20),
-                                  image: DecorationImage(
-                                    fit: BoxFit.cover,
-                                    image: NetworkImage(
-                                      imageUrl,
+                                    height: 60,
+                                    width: 60,
+                                    margin: const EdgeInsets.only(bottom: 10),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(20),
+                                      image: DecorationImage(
+                                        fit: BoxFit.cover,
+                                        image: NetworkImage(imageUrl),
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ),
-                            )
+                                )
                                 .toList(),
                           ),
                           const SizedBox(width: 20),
-                          // ingredients name
+                          // Ingredients Names
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            children: widget.documentSnapshot['ingredientsName']
+                            children: (widget.documentSnapshot['ingredientsName'] ?? [])
                                 .map<Widget>((ingredient) => SizedBox(
-                              height: 60,
-                              child: Center(
-                                child: Text(
-                                  ingredient,
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.grey.shade400,
-                                  ),
-                                ),
-                              ),
-                            ))
+                                      height: 60,
+                                      child: Center(
+                                        child: Text(
+                                          ingredient,
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            color: Colors.grey.shade400,
+                                          ),
+                                        ),
+                                      ),
+                                    ))
                                 .toList(),
                           ),
-                          // ingredient amount
+                          // Ingredient Amounts
                           const Spacer(),
                           Column(
                             children: quantityProvider.updateIngredientAmounts
                                 .map<Widget>((amount) => SizedBox(
-                              height: 60,
-                              child: Center(
-                                child: Text(
-                                  "${amount}gm",
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.grey.shade400,
-                                  ),
-                                ),
-                              ),
-                            ))
+                                      height: 60,
+                                      child: Center(
+                                        child: Text(
+                                          "${amount}gm",
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            color: Colors.grey.shade400,
+                                          ),
+                                        ),
+                                      ),
+                                    ))
                                 .toList(),
                           ),
                         ],
@@ -299,7 +308,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
             style: ElevatedButton.styleFrom(
                 backgroundColor: kprimaryColor,
                 padding:
-                const EdgeInsets.symmetric(horizontal: 100, vertical: 13),
+                    const EdgeInsets.symmetric(horizontal: 100, vertical: 13),
                 foregroundColor: Colors.white),
             onPressed: () {},
             child: const Text(

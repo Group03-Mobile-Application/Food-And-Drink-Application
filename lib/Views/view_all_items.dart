@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-
 import 'package:iconsax/iconsax.dart';
 
 import '../Utils/constants.dart';
@@ -16,14 +15,16 @@ class ViewAllItems extends StatefulWidget {
 
 class _ViewAllItemsState extends State<ViewAllItems> {
   final CollectionReference completeApp =
-      FirebaseFirestore.instance.collection("Complete-Flutter-App");
+      FirebaseFirestore.instance.collection("Food-And-Drink-Application");
+  String searchQuery = "";
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: kbackgroundColor,
       appBar: AppBar(
         backgroundColor: kbackgroundColor,
-        automaticallyImplyLeading: false, // it remove the appbar back button
+        automaticallyImplyLeading: false, // it removes the app bar back button
         elevation: 0,
         actions: [
           const SizedBox(width: 15),
@@ -48,6 +49,29 @@ class _ViewAllItemsState extends State<ViewAllItems> {
           ),
           const SizedBox(width: 15),
         ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(50),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 10),
+            child: TextField(
+              decoration: InputDecoration(
+                hintText: "Search items...",
+                prefixIcon: const Icon(Icons.search),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(15),
+                  borderSide: BorderSide.none,
+                ),
+                filled: true,
+                fillColor: Colors.white,
+              ),
+              onChanged: (value) {
+                setState(() {
+                  searchQuery = value.toLowerCase(); // Update search queries
+                });
+              },
+            ),
+          ),
+        ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.only(left: 15, right: 5),
@@ -58,19 +82,23 @@ class _ViewAllItemsState extends State<ViewAllItems> {
               stream: completeApp.snapshots(),
               builder: (context, AsyncSnapshot<QuerySnapshot> streamSnapshot) {
                 if (streamSnapshot.hasData) {
-                  return GridView.builder(
+                  // Filter items based on the search query
+                  final filteredDocs = streamSnapshot.data!.docs.where((doc) {
+                    final itemName = (doc['name'] ?? '').toString().toLowerCase();
+                    return itemName.contains(searchQuery);
+                  }).toList();
 
-                    itemCount: streamSnapshot.data!.docs.length,
+                  return GridView.builder(
+                    itemCount: filteredDocs.length,
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
                       childAspectRatio: 0.78,
                     ),
                     itemBuilder: (context, index) {
                       final DocumentSnapshot documentSnapshot =
-                          streamSnapshot.data!.docs[index];
+                          filteredDocs[index];
 
                       return Column(
                         children: [
@@ -103,7 +131,7 @@ class _ViewAllItemsState extends State<ViewAllItems> {
                     },
                   );
                 }
-                // it means if snapshot has date then show the date otherwise show the progress bar
+                // If no data is available, show a loading indicator
                 return const Center(
                   child: CircularProgressIndicator(),
                 );
