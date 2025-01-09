@@ -19,9 +19,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        // for favorite provider
+        // for favorite providers
         ChangeNotifierProvider(create: (_)=>FavoriteProvider()),
-        // for quantity provider
+        // for quantity providers
         ChangeNotifierProvider(create: (_) => QuantityProvider()),
       ],
       child: const MaterialApp(
