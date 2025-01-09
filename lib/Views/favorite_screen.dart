@@ -1,12 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:provider/provider.dart';
 
 import '../Provider/favorite_provider.dart';
-import '../Provider/theme_provider.dart';
 import '../Utils/constants.dart';
-import 'recipe_detail_screen.dart';
 
 class FavoriteScreen extends StatefulWidget {
   const FavoriteScreen({super.key});
@@ -16,119 +13,30 @@ class FavoriteScreen extends StatefulWidget {
 }
 
 class _FavoriteScreenState extends State<FavoriteScreen> {
-  String searchQuery = "";
-  String category = "All"; // Default category
-  List<Map<String, dynamic>> favoriteData = [];
-  bool isLoading = true;
-
-  final CollectionReference categoriesItems =
-      FirebaseFirestore.instance.collection("App-Category");
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _fetchFavoriteData();
-  }
-
-  Future<void> _fetchFavoriteData() async {
-    final provider = Provider.of<FavoriteProvider>(context, listen: false);
-    final favoriteItems = provider.favorites;
-
-    List<Map<String, dynamic>> fetchedData = [];
-    for (String favoriteId in favoriteItems) {
-      var doc = await FirebaseFirestore.instance
-          .collection("Food-And-Drink-Application")
-          .doc(favoriteId)
-          .get();
-      if (doc.exists) {
-        fetchedData.add({
-          "id": favoriteId,
-          "name": doc['name'] ?? 'Unknown',
-          "image": doc['image'] ?? '',
-          "cal": doc['cal'] ?? 0,
-          "time": doc['time'] ?? 0,
-          "category": doc['category'] ?? 'Other', // Category field
-        });
-      }
-    }
-
-    setState(() {
-      favoriteData = fetchedData;
-      isLoading = false;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
     final provider = FavoriteProvider.of(context);
     final favoriteItems = provider.favorites;
-    // Filter favorites based on search query and selected category
-    final filteredFavorites = favoriteData.where((item) {
-      final matchesSearch = item['name']
-          .toLowerCase()
-          .contains(searchQuery.toLowerCase()); // Matches search query
-      final matchesCategory = category == "All" ||
-          item['category'] == category; // Matches selected category
-      return matchesSearch && matchesCategory;
-    }).toList();
-
     return Scaffold(
-      backgroundColor: themeProvider.isDarkMode ?
-      Colors.grey[850] : kbackgroundColor, // Change here
+      backgroundColor: kbackgroundColor,
       appBar: AppBar(
-        backgroundColor: themeProvider.isDarkMode ?
-        Colors.grey[850] : kbackgroundColor, // Change here
+        backgroundColor: kbackgroundColor,
         centerTitle: true,
-        title:  Text(
+        title: const Text(
           "Favorites",
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            color:  themeProvider.isDarkMode ? Colors.white : Colors.black,
-          ),
-        ),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(110.0),
-          child: Column(
-            children: [
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 15.0, vertical: 5.0),
-                child: TextField(
-                  decoration: InputDecoration(
-                    hintText: "Search favorites...",
-                    prefixIcon: const Icon(Icons.search),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(15.0),
-                      borderSide: BorderSide.none,
-                    ),
-                    filled: true,
-                    fillColor: Colors.white,
-                  ),
-                  onChanged: (value) {
-                    setState(() {
-                      searchQuery = value;
-                    });
-                  },
-                ),
-              ),
-              const SizedBox(height: 10),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 15.0),
-                child: selectedCategory(), // Category selection widget
-              ),
-            ],
           ),
         ),
       ),
+
       body: favoriteItems.isEmpty
-          ?  Center(
+          ? const Center(
         child: Text(
           "No Favorites yet",
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: themeProvider.isDarkMode ? Colors.white : Colors.black,
           ),
         ),
       )
@@ -162,7 +70,7 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
                       width: double.infinity,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(20),
-                        color: themeProvider.isDarkMode ? Colors.grey[800] : Colors.white,
+                        color: Colors.white,
                       ),
                       child: Row(
                         children: [
@@ -186,10 +94,9 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
                             children: [
                               Text(
                                 favoriteItem['name'],
-                                style: TextStyle(
+                                style: const TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 16,
-                                  color: themeProvider.isDarkMode ? Colors.white : Colors.black,
                                 ),
                               ),
                               const SizedBox(height: 5),
@@ -237,6 +144,7 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
                       ),
                     ),
                   ),
+                  // for delete button
                   Positioned(
                     top: 50,
                     right: 35,
