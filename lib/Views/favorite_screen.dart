@@ -67,9 +67,9 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
     final filteredFavorites = favoriteData.where((item) {
       final matchesSearch = item['name']
           .toLowerCase()
-          .contains(searchQuery.toLowerCase()); // Matches search query
+          .contains(searchQuery.toLowerCase());
       final matchesCategory = category == "All" ||
-          item['category'] == category; // Matches selected category
+          item['category'] == category;
       return matchesSearch && matchesCategory;
     }).toList();
 
@@ -115,7 +115,7 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
               const SizedBox(height: 10),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 15.0),
-                child: selectedCategory(), // Category selection widget
+                child: selectedCategory(),
               ),
             ],
           ),
@@ -160,7 +160,7 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
                 favoriteData.remove(favoriteItem);
               });
 
-              // Show confirmation SnackBar
+
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(
