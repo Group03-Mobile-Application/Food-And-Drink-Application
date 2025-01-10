@@ -15,30 +15,58 @@ class FavoriteScreen extends StatefulWidget {
 }
 
 class _FavoriteScreenState extends State<FavoriteScreen> {
+  String searchQuery = "";
+
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
     final provider = FavoriteProvider.of(context);
     final favoriteItems = provider.favorites;
+
+    final filteredFavorites = favoriteItems.where((favoriteId) {
+      return favoriteId.toLowerCase().contains(searchQuery.toLowerCase());
+    }).toList();
+
     return Scaffold(
-      backgroundColor: themeProvider.isDarkMode ?
-      Colors.grey[850] : kbackgroundColor, // Change here
+      backgroundColor: themeProvider.isDarkMode ? Colors.grey[850] : kbackgroundColor,
       appBar: AppBar(
-        backgroundColor: themeProvider.isDarkMode ?
-        Colors.grey[850] : kbackgroundColor, // Change here
+        backgroundColor: themeProvider.isDarkMode ? Colors.grey[850] : kbackgroundColor,
         centerTitle: true,
-        title:  Text(
+        title: Text(
           "Favorites",
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            color:  themeProvider.isDarkMode ? Colors.white : Colors.black,
+            color: themeProvider.isDarkMode ? Colors.white : Colors.black,
+          ),
+        ),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(60.0),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              decoration: InputDecoration(
+                hintText: "Search favorites...",
+                prefixIcon: const Icon(Icons.search),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(15.0),
+                  borderSide: BorderSide.none,
+                ),
+                filled: true,
+                fillColor: themeProvider.isDarkMode ? Colors.grey[700] : Colors.white,
+              ),
+              onChanged: (value) {
+                setState(() {
+                  searchQuery = value;
+                });
+              },
+            ),
           ),
         ),
       ),
-      body: favoriteItems.isEmpty
-          ?  Center(
+      body: filteredFavorites.isEmpty
+          ? Center(
         child: Text(
-          "No Favorites yet",
+          "No Favorites found",
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
@@ -47,13 +75,13 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
         ),
       )
           : ListView.builder(
-        itemCount: favoriteItems.length,
+        itemCount: filteredFavorites.length,
         itemBuilder: (context, index) {
-          String favorite = favoriteItems[index];
+          String favoriteId = filteredFavorites[index];
           return FutureBuilder<DocumentSnapshot>(
             future: FirebaseFirestore.instance
                 .collection("Food-And-Drink-Application")
-                .doc(favorite)
+                .doc(favoriteId)
                 .get(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
@@ -146,7 +174,7 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
                                 ],
                               )
                             ],
-                          )
+                          ),
                         ],
                       ),
                     ),

@@ -24,31 +24,41 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
   final TextEditingController _commentController = TextEditingController();
   YoutubePlayerController? _youtubeController;
   bool isInitialized = false;
+  bool _isYoutubeControllerInitialized = false;
+
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      List<double> baseAmounts = (widget
+          .documentSnapshot['ingredientsAmount'] ?? [])
+          .map<double>((amount) => double.tryParse(amount.toString()) ?? 0.0)
+          .toList();
+      Provider.of<QuantityProvider>(context, listen: false)
+          .setBaseIngredientAmounts(baseAmounts);
+    });
+
+
+    final videoLink = widget.documentSnapshot['videoLink'];
+    if (videoLink != null && videoLink.isNotEmpty) {
+      _youtubeController = YoutubePlayerController(
+        initialVideoId: YoutubePlayer.convertUrlToId(videoLink)!,
+        flags: const YoutubePlayerFlags(
+          autoPlay: false,
+          mute: false,
+        ),
+      );
+      _isYoutubeControllerInitialized = true;
+    }
+  }
 
 
   @override
   void dispose() {
     _commentController.dispose();
-    super.dispose();
     _youtubeController?.dispose();
     super.dispose();
-  }
-
-
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (!isInitialized) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        // Initialize base ingredient amounts in the provider
-        List<double> baseAmounts = (widget
-            .documentSnapshot['ingredientsAmount'] ?? [])
-            .map<double>((amount) => double.tryParse(amount.toString()) ?? 0.0)
-            .toList();
-        Provider.of<QuantityProvider>(context, listen: false)
-            .setBaseIngredientAmounts(baseAmounts);
-      });
-      isInitialized = true;
-    }
   }
 
   Future<void> _addComment() async {
@@ -66,20 +76,13 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
       _commentController.clear();
     }
 
-
-    final videoLink = widget.documentSnapshot['videoLink'];
-    if (videoLink != null && videoLink.isNotEmpty) {
-      _youtubeController = YoutubePlayerController(
-        initialVideoId: YoutubePlayer.convertUrlToId(videoLink)!,
-        flags: const YoutubePlayerFlags(
-          autoPlay: false,
-          mute: false,
-        ),
-      );
-    }
   }
+
+
+
+
   void _showVideoDialog() {
-    if (_youtubeController == null) {
+    if (_youtubeController == null || !_isYoutubeControllerInitialized) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('No video link available')),
       );
@@ -152,7 +155,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
       ),
     );
 
-    }
+  }
 
   @override
   Widget build(BuildContext context) {

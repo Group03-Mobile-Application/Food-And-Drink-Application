@@ -11,7 +11,7 @@ class FavoriteProvider extends ChangeNotifier {
   FavoriteProvider() {
     loadFavorites();
   }
-  // toggle favorites states
+
   void toggleFavorite(DocumentSnapshot product) async {
     String productId = product.id;
     if (_favoriteIds.contains(productId)) {
@@ -24,12 +24,12 @@ class FavoriteProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // chek if a product is favorited
+
   bool isExist(DocumentSnapshot prouct) {
     return _favoriteIds.contains(prouct.id);
   }
 
-  // add favorites to firestore
+
   Future<void> _addFavorite(String productId) async {
     try {
       await _firestore.collection("userFavorite").doc(productId).set({
@@ -41,7 +41,7 @@ class FavoriteProvider extends ChangeNotifier {
     }
   }
 
-  // Remove favorite from firestore
+
   Future<void> _removeFavorite(String productId) async {
     try {
       await _firestore.collection("userFavorite").doc(productId).delete();
@@ -50,7 +50,7 @@ class FavoriteProvider extends ChangeNotifier {
     }
   }
 
-  // load favories from firestore (store favorite or not)
+
   Future<void> loadFavorites() async {
     try {
       QuerySnapshot snapshot =
@@ -62,7 +62,6 @@ class FavoriteProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Static method to access the provider from any context
   static FavoriteProvider of(BuildContext context, {bool listen = true}) {
     return Provider.of<FavoriteProvider>(
       context,
