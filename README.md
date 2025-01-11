@@ -1,16 +1,14 @@
-# food_and_drink
+# Recipe Corner
+
+Food-And-Drink-Application
 
 A new Flutter project.
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
 
-A few resources to get you started if this is your first Flutter project:
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+The Food Recipe App is designed to make looking up, saving, and organizing recipes easy and fun. It helps a user either to do an easy lookup for recipes or browse them from categories like breakfast, lunch, dinner, and desserts. The app displays clear lists of ingredients with automatic measurement adjustments based on servings. View recipe videos, comment, or even edit comments.
+Users will be able to save favourite recipes, put them in order by category, search within your favourites, or delete some of them. This application also allows meal planning for the current day and further, with the ability to edit or delete plans. The meal plans will be saved locally on your device.
+With a personal touch, it gives light and dark mode, which will never irritate the eyes whether it is used at day or night.
