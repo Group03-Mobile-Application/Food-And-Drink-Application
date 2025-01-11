@@ -1,7 +1,7 @@
 # Recipe Corner
+<img src="https://cdn5.f-cdn.com/contestentries/157322/13929033/54e3207f255dd_thumb900.jpg" alt="Food and Drink App" width="30">
 (Food-And-Drink-Application)
 
-<img src="https://cdn5.f-cdn.com/contestentries/157322/13929033/54e3207f255dd_thumb900.jpg" alt="Food and Drink App" width="300">
 
 
 ## Getting Started
