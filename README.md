@@ -1,8 +1,6 @@
 # Recipe Corner
+(Food-And-Drink-Application)
 
-Food-And-Drink-Application
-
-A new Flutter project.
 
 ## Getting Started
 
