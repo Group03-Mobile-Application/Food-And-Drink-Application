@@ -1,6 +1,8 @@
 # Recipe Corner
 (Food-And-Drink-Application)
-![Food and Drink App](https://cdn5.f-cdn.com/contestentries/157322/13929033/54e3207f255dd_thumb900.jpg)
+
+<img src="https://cdn5.f-cdn.com/contestentries/157322/13929033/54e3207f255dd_thumb900.jpg" alt="Food and Drink App" width="300">
+
 
 ## Getting Started
 
